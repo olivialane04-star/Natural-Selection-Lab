@@ -1,485 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Natural Selection Interactive Simulation</title>
-<style>
-  :root{
-    --bg:#f6f8fb;
-    --card:#ffffff;
-    --text:#1f2937;
-    --muted:#6b7280;
-    --border:#d1d5db;
-    --accent:#2563eb;
-    --good:#166534;
-    --warn:#92400e;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    line-height:1.45;
-  }
-  .wrap{
-    max-width:1200px;
-    margin:0 auto;
-    padding:24px;
-  }
-  h1,h2,h3{margin:0 0 10px}
-  p{margin:0 0 10px}
-  .subtitle{color:var(--muted); margin-bottom:18px}
-  .grid{
-    display:grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap:18px;
-  }
-  .card{
-    background:var(--card);
-    border:1px solid var(--border);
-    border-radius:16px;
-    padding:18px;
-    box-shadow:0 6px 18px rgba(0,0,0,.05);
-  }
-  .controls{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin:12px 0 8px;
-  }
-  button, select{
-    border:1px solid var(--border);
-    background:white;
-    border-radius:10px;
-    padding:10px 14px;
-    font-size:14px;
-  }
-  button{
-    cursor:pointer;
-    font-weight:600;
-  }
-  button.primary{
-    background:var(--accent);
-    color:white;
-    border-color:var(--accent);
-  }
-  .pill{
-    display:inline-block;
-    padding:6px 10px;
-    border-radius:999px;
-    background:#eef2ff;
-    color:#3730a3;
-    font-size:13px;
-    margin-right:8px;
-    margin-bottom:8px;
-  }
-  .stats{
-    display:grid;
-    grid-template-columns: repeat(3,1fr);
-    gap:10px;
-    margin-top:12px;
-  }
-  .stat{
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px;
-    text-align:center;
-  }
-  .swatch{
-    width:14px;height:14px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,.15)
-  }
-  .light{background:#8fd36c}
-  .dark{background:#2f7d32}
-  .brown{background:#8b5e34}
-  table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:14px;
-  }
-  th,td{
-    border:1px solid var(--border);
-    padding:8px;
-    text-align:center;
-  }
-  th{
-    background:#f3f4f6;
-  }
-  .small{font-size:13px;color:var(--muted)}
-  .question{
-    border-left:4px solid var(--accent);
-    padding-left:12px;
-    margin:12px 0;
-  }
-  canvas{
-    width:100%;
-    height:340px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    background:white;
-  }
-  .two-col{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:12px;
-  }
-  textarea{
-    width:100%;
-    min-height:120px;
-    border:1px solid var(--border);
-    border-radius:12px;
-    padding:12px;
-    font:inherit;
-    resize:vertical;
-  }
-  .banner{
-    padding:12px 14px;
-    border-radius:12px;
-    background:#fef3c7;
-    color:#78350f;
-    margin:12px 0;
-  }
-  @media (max-width: 900px){
-    .grid{grid-template-columns:1fr}
-    .stats{grid-template-columns:1fr}
-    .two-col{grid-template-columns:1fr}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Natural Selection Virtual Lab</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #059669;
+      --danger: #dc2626;
+      --line: #dbe4ee;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #dbeafe 0%, #ecfeff 100%);
+      border: 1px solid #c7ddff;
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+
+    .hero p {
+      margin-bottom: 0;
+      line-height: 1.55;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+    }
+
+    .panel, .main-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 18px;
+      position: sticky;
+      top: 16px;
+      height: fit-content;
+    }
+
+    .section {
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input[type="range"], select, textarea {
+      width: 100%;
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+
+    select, textarea {
+      padding: 10px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .value-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .primary { background: var(--accent); color: white; }
+    .secondary { background: #e5edff; color: #1e40af; }
+    .success { background: #dcfce7; color: #166534; }
+    .danger { background: #fee2e2; color: #991b1b; }
+
+    .main-card {
+      padding: 18px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: #f8fbff;
+      border: 1px solid #dde8f4;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .stat .k {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 6px;
+    }
+
+    .stat .v {
+      font-size: 1.55rem;
+      font-weight: 800;
+    }
+
+    .playground {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .ecosystem {
+      background: linear-gradient(180deg, #d9f99d 0%, #86efac 100%);
+      border-radius: 20px;
+      border: 1px solid #b7d8b5;
+      min-height: 290px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ecosystem.drought {
+      background: linear-gradient(180deg, #fde68a 0%, #e7c57a 100%);
+    }
+
+    .ecosystem.predator-heavy::after {
+      content: "Predators active";
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.88);
+      color: #7f1d1d;
+      border: 1px solid #fecaca;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .beetle-field {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-content: flex-start;
+      min-height: 240px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .beetle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,0.18);
+      position: relative;
+    }
+
+    .beetle::before, .beetle::after {
+      content: "";
+      position: absolute;
+      top: 6px;
+      width: 7px;
+      height: 2px;
+      background: rgba(0,0,0,0.25);
+    }
+
+    .beetle::before { left: -6px; transform: rotate(25deg); }
+    .beetle::after { right: -6px; transform: rotate(-25deg); }
+
+    .beetle.green { background: #16a34a; }
+    .beetle.brown { background: #8b5e3c; }
+    .beetle.fast { box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+    .beetle.mutant { outline: 3px solid rgba(168, 85, 247, 0.35); }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 14px;
+      margin-top: 12px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+
+    .events, .table-wrap, .cer-box {
+      background: #fbfdff;
+      border: 1px solid #e5edf7;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .events {
+      min-height: 290px;
+    }
+
+    .event-log {
+      max-height: 240px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .event-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #edf2f7;
+      line-height: 1.45;
+      font-size: 0.93rem;
+    }
+
+    .event-item:last-child { border-bottom: none; }
+
+    canvas {
+      background: white;
+      border-radius: 16px;
+      border: 1px solid #e5edf7;
+      padding: 8px;
+      width: 100%;
+      height: 320px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th, td {
+      border-bottom: 1px solid #e7eef6;
+      padding: 10px 8px;
+      text-align: left;
+    }
+
+    th {
+      background: #f4f8fc;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .table-scroll {
+      max-height: 300px;
+      overflow: auto;
+      border: 1px solid #e7eef6;
+      border-radius: 14px;
+    }
+
+    .prompt {
+      background: #eff6ff;
+      border: 1px solid #cfe1ff;
+      padding: 12px;
+      border-radius: 14px;
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .footer-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 1080px) {
+      .grid, .playground {
+        grid-template-columns: 1fr;
+      }
+      .panel {
+        position: static;
+      }
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .stats, .button-row {
+        grid-template-columns: 1fr;
+      }
+      .wrap {
+        padding: 14px;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Natural Selection Interactive Simulation</h1>
-  <p class="subtitle"><strong>11th Grade Biology</strong> | Standard: <em>Construct an explanation based on evidence for how natural selection leads to adaptation of populations.</em></p>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Natural Selection Virtual Lab</h1>
+      <p>
+        <strong>Standard:</strong> Construct an explanation based on evidence for how natural selection leads to adaptation of populations.<br>
+        Change the environment, add predators, adjust mutation rate, and watch how the beetle population shifts across generations. Then use the data to write a CER response.
+      </p>
+    </section>
 
-  <div class="grid">
-    <section class="card">
-      <h2>Simulation Setup</h2>
-      <p>This simulation models a beetle population with three color variations. Predatory birds hunt by sight. When the habitat changes, survival changes too. Over generations, the population can shift like a biological weather vane.</p>
-
-      <div>
-        <span class="pill">Trait variation</span>
-        <span class="pill">Selection pressure</span>
-        <span class="pill">Inheritance</span>
-        <span class="pill">Adaptation</span>
-      </div>
-
-      <div class="controls">
-        <label>Environment:
-          <select id="environmentSelect">
-            <option value="green">Green Grassland</option>
-            <option value="brown">Dry Brown Grassland</option>
+    <div class="grid">
+      <aside class="panel">
+        <div class="section">
+          <h2>Controls</h2>
+          <label for="environment">Environment</label>
+          <select id="environment">
+            <option value="forest">Forest floor</option>
+            <option value="drought">Dry brown terrain</option>
           </select>
-        </label>
-        <button class="primary" id="runOneBtn">Run 1 Generation</button>
-        <button id="runFiveBtn">Run 5 Generations</button>
-        <button id="applyDroughtBtn">Apply Drought</button>
-        <button id="resetBtn">Reset</button>
-      </div>
-
-      <div class="banner" id="envBanner">
-        Current habitat: <strong>Green Grassland</strong>. Camouflage favors green beetles.
-      </div>
-
-      <div class="stats">
-        <div class="stat">
-          <h3><span class="swatch light"></span>Light Green</h3>
-          <div id="lightCount" style="font-size:28px;font-weight:700;">40</div>
-          <div class="small">Starting population</div>
+          <p class="small">Background color changes which trait blends in best.</p>
         </div>
-        <div class="stat">
-          <h3><span class="swatch dark"></span>Dark Green</h3>
-          <div id="darkCount" style="font-size:28px;font-weight:700;">35</div>
-          <div class="small">Starting population</div>
+
+        <div class="section">
+          <label for="predator">Predator pressure</label>
+          <input id="predator" type="range" min="0" max="100" value="40" />
+          <div class="value-row"><span>Low</span><strong id="predatorValue">40%</strong><span>High</span></div>
+
+          <label for="food">Food availability</label>
+          <input id="food" type="range" min="40" max="140" value="100" />
+          <div class="value-row"><span>Scarce</span><strong id="foodValue">100%</strong><span>Abundant</span></div>
+
+          <label for="mutation">Mutation chance</label>
+          <input id="mutation" type="range" min="0" max="20" value="4" />
+          <div class="value-row"><span>Rare</span><strong id="mutationValue">4%</strong><span>Frequent</span></div>
         </div>
-        <div class="stat">
-          <h3><span class="swatch brown"></span>Brown</h3>
-          <div id="brownCount" style="font-size:28px;font-weight:700;">25</div>
-          <div class="small">Starting population</div>
+
+        <div class="section">
+          <label for="startingPopulation">Starting population</label>
+          <input id="startingPopulation" type="range" min="40" max="200" value="100" />
+          <div class="value-row"><span>Small</span><strong id="startValue">100</strong><span>Large</span></div>
+
+          <label for="greenStart">Starting green trait frequency</label>
+          <input id="greenStart" type="range" min="0" max="100" value="50" />
+          <div class="value-row"><span>0%</span><strong id="greenValue">50%</strong><span>100%</span></div>
         </div>
-      </div>
 
-      <h3 style="margin-top:18px;">Generation Log</h3>
-      <div style="overflow:auto; max-height:360px;">
-        <table id="logTable">
-          <thead>
-            <tr>
-              <th>Generation</th>
-              <th>Habitat</th>
-              <th>Light Green</th>
-              <th>Dark Green</th>
-              <th>Brown</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </section>
+        <div class="section">
+          <div class="button-row">
+            <button class="primary" id="nextGenBtn">Run 1 Generation</button>
+            <button class="secondary" id="fiveGenBtn">Run 5 Generations</button>
+            <button class="success" id="autoBtn">Auto Run</button>
+            <button class="danger" id="resetBtn">Reset</button>
+          </div>
+          <p class="small" style="margin-top:10px;">Auto Run continues until you press it again or the population crashes.</p>
+        </div>
 
-    <section class="card">
-      <h2>Population Graph</h2>
-      <canvas id="chart" width="520" height="340"></canvas>
-      <p class="small" style="margin-top:8px;">The graph tracks how trait frequencies change over time. Populations evolve. Individual beetles do not suddenly repaint themselves.</p>
+        <div class="section">
+          <h3>Student Task</h3>
+          <p class="small">
+            Use the graph and data table to identify which traits increased over time and explain why. Remember: individuals do not evolve. <strong>Populations</strong> change over generations.
+          </p>
+        </div>
+      </aside>
 
-      <h3 style="margin-top:16px;">Quick Analysis</h3>
-      <div class="question">
-        <strong>1.</strong> Which color is favored in the current environment, and what evidence from the data supports that?
-      </div>
-      <div class="question">
-        <strong>2.</strong> How did the drought change which trait was advantageous?
-      </div>
-      <div class="question">
-        <strong>3.</strong> How does this simulation show adaptation of a population rather than change in an individual?
-      </div>
-    </section>
+      <main class="main-card">
+        <div class="stats">
+          <div class="stat"><div class="k">Generation</div><div class="v" id="genStat">0</div></div>
+          <div class="stat"><div class="k">Population</div><div class="v" id="popStat">100</div></div>
+          <div class="stat"><div class="k">Green trait</div><div class="v" id="greenStat">50%</div></div>
+          <div class="stat"><div class="k">Fast trait</div><div class="v" id="fastStat">50%</div></div>
+        </div>
+
+        <div class="playground">
+          <div>
+            <div class="ecosystem" id="ecosystem">
+              <div class="beetle-field" id="beetleField"></div>
+            </div>
+            <div class="legend">
+              <span><i class="dot" style="background:#16a34a"></i> Green beetle</span>
+              <span><i class="dot" style="background:#8b5e3c"></i> Brown beetle</span>
+              <span><i class="dot" style="background:#ffffff; box-shadow:0 0 0 3px rgba(37,99,235,.15)"></i> Fast trait glow</span>
+              <span><i class="dot" style="background:#ffffff; outline:3px solid rgba(168,85,247,.35)"></i> Mutation ring</span>
+            </div>
+          </div>
+
+          <div class="events">
+            <h3>Simulation Notes</h3>
+            <div class="event-log" id="eventLog"></div>
+          </div>
+        </div>
+
+        <div class="section" style="border-bottom:none; padding-bottom:0; margin-bottom:18px;">
+          <h2>Trait Frequency Graph</h2>
+          <canvas id="chart"></canvas>
+        </div>
+
+        <div class="table-wrap" style="margin-bottom:18px;">
+          <h2>Evidence Table</h2>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Generation</th>
+                  <th>Total Population</th>
+                  <th>Green %</th>
+                  <th>Brown %</th>
+                  <th>Fast %</th>
+                  <th>Mutant %</th>
+                </tr>
+              </thead>
+              <tbody id="dataBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="cer-box">
+          <h2>CER Response</h2>
+          <div class="prompt">
+            <strong>Prompt:</strong> Construct an explanation based on evidence for how natural selection led to adaptation in this beetle population.
+          </div>
+          <label for="claimBox">Claim</label>
+          <textarea id="claimBox" placeholder="State what happened to the population over time."></textarea>
+
+          <label for="evidenceBox" style="margin-top:10px;">Evidence</label>
+          <textarea id="evidenceBox" placeholder="Use numbers from the table or graph. Example: Brown beetles increased from 50% to 82% by generation 10."></textarea>
+
+          <label for="reasoningBox" style="margin-top:10px;">Reasoning</label>
+          <textarea id="reasoningBox" placeholder="Explain why the advantageous traits became more common. Connect survival, reproduction, and environment."></textarea>
+
+          <div class="button-row" style="margin-top:12px; max-width:420px;">
+            <button class="secondary" id="sampleCerBtn">Generate Sample CER</button>
+            <button class="primary" id="copyCerBtn">Copy CER</button>
+          </div>
+          <div class="footer-note">
+            Tip: Look for which trait had the best survival advantage in the selected environment. That is your adaptation story.
+          </div>
+        </div>
+      </main>
+    </div>
   </div>
 
-  <section class="card" style="margin-top:18px;">
-    <h2>Student Explanation</h2>
-    <div class="two-col">
-      <div>
-        <h3>CER Prompt</h3>
-        <p><strong>Claim:</strong> State how natural selection led to adaptation in this beetle population.</p>
-        <p><strong>Evidence:</strong> Use numbers from at least two generations.</p>
-        <p><strong>Reasoning:</strong> Explain how environmental pressure affected survival and reproduction.</p>
-      </div>
-      <div>
-        <h3>Write Here</h3>
-        <textarea placeholder="Example starter: Natural selection caused the beetle population to become better adapted to the environment because..."></textarea>
-      </div>
-    </div>
-  </section>
-</div>
-
-<script>
-  const initialState = { light: 40, dark: 35, brown: 25, generation: 0, environment: "green" };
-  let state = JSON.parse(JSON.stringify(initialState));
-  let history = [];
-
-  const lightCount = document.getElementById("lightCount");
-  const darkCount = document.getElementById("darkCount");
-  const brownCount = document.getElementById("brownCount");
-  const logBody = document.querySelector("#logTable tbody");
-  const envBanner = document.getElementById("envBanner");
-  const envSelect = document.getElementById("environmentSelect");
-  const chart = document.getElementById("chart");
-  const ctx = chart.getContext("2d");
-
-  function updateCounts() {
-    lightCount.textContent = state.light;
-    darkCount.textContent = state.dark;
-    brownCount.textContent = state.brown;
-  }
-
-  function totalPop(obj) {
-    return obj.light + obj.dark + obj.brown;
-  }
-
-  function setEnvironment(env) {
-    state.environment = env;
-    envSelect.value = env;
-    if (env === "green") {
-      envBanner.innerHTML = 'Current habitat: <strong>Green Grassland</strong>. Camouflage favors green beetles.';
-    } else {
-      envBanner.innerHTML = 'Current habitat: <strong>Dry Brown Grassland</strong>. Camouflage favors brown beetles.';
-    }
-    redrawChart();
-  }
-
-  function weightedSurvivalRates(environment) {
-    if (environment === "green") {
-      return { light: 0.78, dark: 0.76, brown: 0.42 };
-    }
-    return { light: 0.35, dark: 0.58, brown: 0.80 };
-  }
-
-  function reproduceFromSurvivors(survivors) {
-    const total = totalPop(survivors);
-    if (total === 0) return { light: 0, dark: 0, brown: 0 };
-    const raw = {
-      light: (survivors.light / total) * 100,
-      dark: (survivors.dark / total) * 100,
-      brown: (survivors.brown / total) * 100
-    };
-    // round while preserving total 100
-    let rounded = {
-      light: Math.floor(raw.light),
-      dark: Math.floor(raw.dark),
-      brown: Math.floor(raw.brown)
-    };
-    let remainder = 100 - totalPop(rounded);
-    const decimals = [
-      ["light", raw.light - rounded.light],
-      ["dark", raw.dark - rounded.dark],
-      ["brown", raw.brown - rounded.brown]
-    ].sort((a,b)=>b[1]-a[1]);
-
-    for (let i = 0; i < remainder; i++) {
-      rounded[decimals[i % 3][0]] += 1;
-    }
-    return rounded;
-  }
-
-  function runGeneration() {
-    const rates = weightedSurvivalRates(state.environment);
-    const survivors = {
-      light: Math.round(state.light * rates.light),
-      dark: Math.round(state.dark * rates.dark),
-      brown: Math.round(state.brown * rates.brown)
+  <script>
+    const state = {
+      generation: 0,
+      population: [],
+      history: [],
+      running: false,
+      timer: null
     };
 
-    const nextPop = reproduceFromSurvivors(survivors);
-    state.generation += 1;
-    state.light = nextPop.light;
-    state.dark = nextPop.dark;
-    state.brown = nextPop.brown;
+    const environmentEl = document.getElementById('environment');
+    const predatorEl = document.getElementById('predator');
+    const foodEl = document.getElementById('food');
+    const mutationEl = document.getElementById('mutation');
+    const startPopEl = document.getElementById('startingPopulation');
+    const greenStartEl = document.getElementById('greenStart');
+    const beetleField = document.getElementById('beetleField');
+    const eventLog = document.getElementById('eventLog');
+    const dataBody = document.getElementById('dataBody');
+    const ecosystem = document.getElementById('ecosystem');
 
-    history.push({
-      generation: state.generation,
-      habitat: state.environment === "green" ? "Green" : "Brown",
-      light: state.light,
-      dark: state.dark,
-      brown: state.brown,
-      total: totalPop(state)
-    });
+    const genStat = document.getElementById('genStat');
+    const popStat = document.getElementById('popStat');
+    const greenStat = document.getElementById('greenStat');
+    const fastStat = document.getElementById('fastStat');
 
-    renderLog();
-    updateCounts();
-    redrawChart();
-  }
+    const predatorValue = document.getElementById('predatorValue');
+    const foodValue = document.getElementById('foodValue');
+    const mutationValue = document.getElementById('mutationValue');
+    const startValue = document.getElementById('startValue');
+    const greenValue = document.getElementById('greenValue');
 
-  function renderLog() {
-    logBody.innerHTML = "";
-    const startingRow = document.createElement("tr");
-    startingRow.innerHTML = `
-      <td>0</td>
-      <td>${initialState.environment === "green" ? "Green" : "Brown"}</td>
-      <td>${initialState.light}</td>
-      <td>${initialState.dark}</td>
-      <td>${initialState.brown}</td>
-      <td>100</td>
-    `;
-    logBody.appendChild(startingRow);
-
-    history.forEach(row => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${row.generation}</td>
-        <td>${row.habitat}</td>
-        <td>${row.light}</td>
-        <td>${row.dark}</td>
-        <td>${row.brown}</td>
-        <td>${row.total}</td>
-      `;
-      logBody.appendChild(tr);
-    });
-  }
-
-  function redrawChart() {
-    ctx.clearRect(0,0,chart.width,chart.height);
-
-    const data = [{generation:0, light:initialState.light, dark:initialState.dark, brown:initialState.brown}, ...history];
-    const pad = 40;
-    const w = chart.width;
-    const h = chart.height;
-    const plotW = w - pad * 2;
-    const plotH = h - pad * 2;
-    const maxY = 100;
-
-    ctx.strokeStyle = "#111827";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(pad, pad);
-    ctx.lineTo(pad, h - pad);
-    ctx.lineTo(w - pad, h - pad);
-    ctx.stroke();
-
-    ctx.fillStyle = "#6b7280";
-    ctx.font = "12px Arial";
-    for (let y = 0; y <= 100; y += 20) {
-      const py = h - pad - (y / maxY) * plotH;
-      ctx.strokeStyle = "#e5e7eb";
-      ctx.beginPath();
-      ctx.moveTo(pad, py);
-      ctx.lineTo(w - pad, py);
-      ctx.stroke();
-      ctx.fillText(String(y), 8, py + 4);
+    function rand() {
+      return Math.random();
     }
 
-    const maxX = Math.max(1, data.length - 1);
-    data.forEach((d, i) => {
-      const px = pad + (i / maxX) * plotW;
-      ctx.fillStyle = "#6b7280";
-      ctx.fillText(String(d.generation), px - 3, h - 14);
+    function clamp(num, min, max) {
+      return Math.max(min, Math.min(max, num));
+    }
+
+    function updateSliderLabels() {
+      predatorValue.textContent = predatorEl.value + '%';
+      foodValue.textContent = foodEl.value + '%';
+      mutationValue.textContent = mutationEl.value + '%';
+      startValue.textContent = startPopEl.value;
+      greenValue.textContent = greenStartEl.value + '%';
+    }
+
+    ['input', 'change'].forEach(evt => {
+      predatorEl.addEventListener(evt, updateSliderLabels);
+      foodEl.addEventListener(evt, updateSliderLabels);
+      mutationEl.addEventListener(evt, updateSliderLabels);
+      startPopEl.addEventListener(evt, updateSliderLabels);
+      greenStartEl.addEventListener(evt, updateSliderLabels);
+      environmentEl.addEventListener(evt, renderEnvironmentStyles);
     });
 
-    drawLine(data, "light", "#8fd36c");
-    drawLine(data, "dark", "#2f7d32");
-    drawLine(data, "brown", "#8b5e34");
+    function addEvent(message) {
+      const item = document.createElement('div');
+      item.className = 'event-item';
+      item.innerHTML = message;
+      eventLog.prepend(item);
+    }
 
-    ctx.fillStyle = "#111827";
-    ctx.fillText("Generation", w / 2 - 25, h - 2);
-    ctx.save();
-    ctx.translate(12, h / 2 + 30);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText("Number of Beetles", 0, 0);
-    ctx.restore();
+    function makeBeetle(isGreen, isFast, isMutant = false) {
+      return {
+        green: isGreen,
+        fast: isFast,
+        mutant: isMutant
+      };
+    }
 
-    // legend
-    const legendY = 18;
-    [["Light Green","#8fd36c"],["Dark Green","#2f7d32"],["Brown","#8b5e34"]].forEach((item, idx)=>{
-      ctx.fillStyle = item[1];
-      ctx.fillRect(300 + idx*70, legendY-10, 14, 14);
-      ctx.fillStyle = "#111827";
-      ctx.fillText(item[0], 318 + idx*70, legendY+1);
+    function initializePopulation() {
+      const total = Number(startPopEl.value);
+      const greenPct = Number(greenStartEl.value) / 100;
+      state.population = [];
+      state.generation = 0;
+      state.history = [];
+
+      for (let i = 0; i < total; i++) {
+        const green = rand() < greenPct;
+        const fast = rand() < 0.5;
+        state.population.push(makeBeetle(green, fast, false));
+      }
+
+      addEvent('Simulation reset. A new beetle population has entered the ecosystem.');
+      recordHistory();
+      refreshAll();
+    }
+
+    function getSurvivalChance(beetle) {
+      const predator = Number(predatorEl.value) / 100;
+      const food = Number(foodEl.value) / 100;
+      const env = environmentEl.value;
+
+      let chance = 0.55;
+
+      if (env === 'forest') {
+        chance += beetle.green ? 0.16 : -0.14;
+      } else {
+        chance += beetle.green ? -0.16 : 0.16;
+      }
+
+      chance += beetle.fast ? 0.10 * predator : -0.03 * predator;
+      chance += (food - 1) * 0.18;
+
+      if (beetle.mutant) {
+        chance += 0.03;
+      }
+
+      chance -= predator * 0.12;
+      return clamp(chance, 0.05, 0.95);
+    }
+
+    function reproduce(survivors) {
+      const mutationRate = Number(mutationEl.value) / 100;
+      const food = Number(foodEl.value) / 100;
+      const offspring = [];
+
+      for (const beetle of survivors) {
+        const babies = rand() < (0.75 + (food - 1) * 0.8) ? 2 : 1;
+        for (let i = 0; i < babies; i++) {
+          let green = beetle.green;
+          let fast = beetle.fast;
+          let mutant = beetle.mutant;
+
+          if (rand() < mutationRate) {
+            const which = rand();
+            mutant = true;
+            if (which < 0.45) green = !green;
+            else if (which < 0.9) fast = !fast;
+            else {
+              green = !green;
+              fast = !fast;
+            }
+          }
+
+          offspring.push(makeBeetle(green, fast, mutant));
+        }
+      }
+
+      return offspring;
+    }
+
+    function runGeneration() {
+      if (state.population.length === 0) {
+        addEvent('The population has crashed. Reset the simulation to begin again.');
+        stopAutoRun();
+        return;
+      }
+
+      const survivors = state.population.filter(beetle => rand() < getSurvivalChance(beetle));
+      const before = state.population.length;
+      const after = survivors.length;
+
+      if (survivors.length === 0) {
+        state.population = [];
+        state.generation += 1;
+        recordHistory();
+        refreshAll();
+        addEvent('<strong>Generation ' + state.generation + ':</strong> Environmental pressure wiped out the entire population.');
+        stopAutoRun();
+        return;
+      }
+
+      let nextPopulation = reproduce(survivors);
+      const cap = 260;
+      if (nextPopulation.length > cap) {
+        nextPopulation = nextPopulation.slice(0, cap);
+      }
+
+      state.population = nextPopulation;
+      state.generation += 1;
+      recordHistory();
+      refreshAll();
+
+      const snapshot = currentStats();
+      const winningColor = snapshot.greenPct >= 50 ? 'green' : 'brown';
+      addEvent(
+        '<strong>Generation ' + state.generation + ':</strong> ' +
+        after + ' of ' + before + ' beetles survived. The population now leans <strong>' + winningColor + '</strong> with <strong>' + snapshot.fastPct + '%</strong> fast beetles.'
+      );
+
+      if (state.population.length < 6) {
+        addEvent('Warning: the population is very small, so one unlucky generation could end the line.');
+      }
+    }
+
+    function currentStats() {
+      const total = state.population.length;
+      if (total === 0) {
+        return { total: 0, greenPct: 0, brownPct: 0, fastPct: 0, mutantPct: 0 };
+      }
+      const greenCount = state.population.filter(b => b.green).length;
+      const fastCount = state.population.filter(b => b.fast).length;
+      const mutantCount = state.population.filter(b => b.mutant).length;
+      return {
+        total,
+        greenPct: Math.round((greenCount / total) * 100),
+        brownPct: Math.round(((total - greenCount) / total) * 100),
+        fastPct: Math.round((fastCount / total) * 100),
+        mutantPct: Math.round((mutantCount / total) * 100)
+      };
+    }
+
+    function recordHistory() {
+      const stats = currentStats();
+      state.history.push({ generation: state.generation, ...stats });
+    }
+
+    function renderPopulation() {
+      beetleField.innerHTML = '';
+      const displayCount = Math.min(state.population.length, 120);
+      for (let i = 0; i < displayCount; i++) {
+        const beetle = state.population[i];
+        const div = document.createElement('div');
+        div.className = 'beetle ' + (beetle.green ? 'green' : 'brown') + (beetle.fast ? ' fast' : '') + (beetle.mutant ? ' mutant' : '');
+        beetleField.appendChild(div);
+      }
+    }
+
+    function renderEnvironmentStyles() {
+      ecosystem.classList.toggle('drought', environmentEl.value === 'drought');
+      ecosystem.classList.toggle('predator-heavy', Number(predatorEl.value) >= 55);
+    }
+
+    function renderStats() {
+      const stats = currentStats();
+      genStat.textContent = state.generation;
+      popStat.textContent = stats.total;
+      greenStat.textContent = stats.greenPct + '%';
+      fastStat.textContent = stats.fastPct + '%';
+    }
+
+    function renderTable() {
+      dataBody.innerHTML = '';
+      state.history.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.generation}</td>
+          <td>${row.total}</td>
+          <td>${row.greenPct}%</td>
+          <td>${row.brownPct}%</td>
+          <td>${row.fastPct}%</td>
+          <td>${row.mutantPct}%</td>
+        `;
+        dataBody.appendChild(tr);
+      });
+    }
+
+    let chart;
+    function initChart() {
+      const ctx = document.getElementById('chart');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Green trait %',
+              data: [],
+              borderColor: '#16a34a',
+              backgroundColor: 'rgba(22,163,74,0.12)',
+              tension: 0.25,
+              fill: false
+            },
+            {
+              label: 'Brown trait %',
+              data: [],
+              borderColor: '#8b5e3c',
+              backgroundColor: 'rgba(139,94,60,0.12)',
+              tension: 0.25,
+              fill: false
+            },
+            {
+              label: 'Fast trait %',
+              data: [],
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37,99,235,0.12)',
+              tension: 0.25,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              title: {
+                display: true,
+                text: 'Trait Frequency (%)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Generation'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateChart() {
+      chart.data.labels = state.history.map(row => row.generation);
+      chart.data.datasets[0].data = state.history.map(row => row.greenPct);
+      chart.data.datasets[1].data = state.history.map(row => row.brownPct);
+      chart.data.datasets[2].data = state.history.map(row => row.fastPct);
+      chart.update();
+    }
+
+    function refreshAll() {
+      renderEnvironmentStyles();
+      renderPopulation();
+      renderStats();
+      renderTable();
+      updateChart();
+    }
+
+    function stopAutoRun() {
+      state.running = false;
+      clearInterval(state.timer);
+      state.timer = null;
+      document.getElementById('autoBtn').textContent = 'Auto Run';
+    }
+
+    document.getElementById('nextGenBtn').addEventListener('click', runGeneration);
+    document.getElementById('fiveGenBtn').addEventListener('click', () => {
+      for (let i = 0; i < 5; i++) {
+        if (state.population.length === 0) break;
+        runGeneration();
+      }
     });
-  }
 
-  function drawLine(data, key, color) {
-    const pad = 40, w = chart.width, h = chart.height;
-    const plotW = w - pad * 2, plotH = h - pad * 2;
-    const maxY = 100, maxX = Math.max(1, data.length - 1);
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    data.forEach((d, i) => {
-      const px = pad + (i / maxX) * plotW;
-      const py = h - pad - (d[key] / maxY) * plotH;
-      if (i === 0) ctx.moveTo(px, py);
-      else ctx.lineTo(px, py);
+    document.getElementById('autoBtn').addEventListener('click', () => {
+      if (state.running) {
+        stopAutoRun();
+        return;
+      }
+      state.running = true;
+      document.getElementById('autoBtn').textContent = 'Stop Auto';
+      state.timer = setInterval(() => {
+        if (state.population.length === 0) {
+          stopAutoRun();
+        } else {
+          runGeneration();
+        }
+      }, 700);
     });
-    ctx.stroke();
 
-    data.forEach((d, i) => {
-      const px = pad + (i / maxX) * plotW;
-      const py = h - pad - (d[key] / maxY) * plotH;
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(px, py, 4, 0, Math.PI * 2);
-      ctx.fill();
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      stopAutoRun();
+      initializePopulation();
     });
-  }
 
-  function resetSimulation() {
-    state = JSON.parse(JSON.stringify(initialState));
-    history = [];
-    updateCounts();
-    setEnvironment("green");
-    renderLog();
-    redrawChart();
-  }
+    document.getElementById('sampleCerBtn').addEventListener('click', () => {
+      if (state.history.length < 2) {
+        addEvent('Run more generations first so the CER has evidence to use.');
+        return;
+      }
+      const first = state.history[0];
+      const last = state.history[state.history.length - 1];
+      const envText = environmentEl.value === 'forest' ? 'the green forest environment' : 'the dry brown environment';
+      const dominantTrait = last.greenPct > first.greenPct ? 'green coloration' : (last.greenPct < first.greenPct ? 'brown coloration' : 'body color');
+      const claim = 'Natural selection caused the beetle population to become better adapted to ' + envText + ', because the trait that improved survival became more common over generations.';
+      const evidence = 'At generation ' + first.generation + ', the population was ' + first.greenPct + '% green and ' + first.fastPct + '% fast. By generation ' + last.generation + ', it was ' + last.greenPct + '% green, ' + last.brownPct + '% brown, and ' + last.fastPct + '% fast.';
+      const reasoning = 'Beetles with ' + dominantTrait + ' had a survival advantage in ' + envText + '. Because they survived predator pressure and competition more often, they reproduced more and passed those traits to offspring. Over time, the population changed, which is adaptation through natural selection.';
 
-  document.getElementById("runOneBtn").addEventListener("click", runGeneration);
-  document.getElementById("runFiveBtn").addEventListener("click", () => {
-    for (let i = 0; i < 5; i++) runGeneration();
-  });
-  document.getElementById("applyDroughtBtn").addEventListener("click", () => setEnvironment("brown"));
-  document.getElementById("resetBtn").addEventListener("click", resetSimulation);
-  envSelect.addEventListener("change", (e) => setEnvironment(e.target.value));
+      document.getElementById('claimBox').value = claim;
+      document.getElementById('evidenceBox').value = evidence;
+      document.getElementById('reasoningBox').value = reasoning;
+    });
 
-  resetSimulation();
-</script>
+    document.getElementById('copyCerBtn').addEventListener('click', async () => {
+      const text = [
+        'Claim: ' + document.getElementById('claimBox').value,
+        'Evidence: ' + document.getElementById('evidenceBox').value,
+        'Reasoning: ' + document.getElementById('reasoningBox').value
+      ].join('\n\n');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        addEvent('CER copied to clipboard.');
+      } catch (e) {
+        addEvent('Clipboard copy did not work in this browser. You can still select and copy the text manually.');
+      }
+    });
+
+    updateSliderLabels();
+    initChart();
+    initializePopulation();
+  </script>
 </body>
 </html>
